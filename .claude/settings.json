@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf .venv)",
+      "Bash(python3 -m py_compile odyssey_watch.py)",
+      "Bash(python3 odyssey_watch.py --probe)"
+    ],
+    "additionalDirectories": [
+      "/Users/mdamirhamzafaisal/Desktop/projects/odyssey/.venv"
+    ]
+  }
+}
