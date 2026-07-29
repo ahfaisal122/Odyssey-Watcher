@@ -1,0 +1,52 @@
+name: odyssey-watch
+
+# NOTE: cron is UTC. Prague is UTC+2 (CEST) in summer, so Prague
+# Wednesday 00:00-02:00 falls on Tuesday in UTC. The dense window
+# therefore covers Tue+Wed UTC to catch a midnight-Prague drop.
+#
+# Keep this repo PUBLIC — private repos get 2,000 free Actions
+# minutes/month and a 5-minute cron blows past that in days.
+
+on:
+  schedule:
+    - cron: "*/5 * * * 2,3"        # Tue+Wed UTC: every 5 min (drop window)
+    - cron: "0 */3 * * 0,1,4,5,6"  # other days: every 3 hours
+  workflow_dispatch:                # manual "Run workflow" button
+
+permissions:
+  contents: write
+
+concurrency:
+  group: odyssey-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Check for new screenings
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TZ: Europe/Prague
+        run: python3 odyssey_watch.py
+
+      - name: Persist state
+        run: |
+          git config user.name  "odyssey-watch"
+          git config user.email "actions@github.com"
+          git add -A seen_events.json horizon.csv 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "no state change"
+          else
+            git commit -m "state $(date -u +%FT%TZ)"
+            git pull --rebase --autostash || true
+            git push
+          fi
