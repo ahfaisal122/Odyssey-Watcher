@@ -5,7 +5,7 @@ moment new tickets go on sale.
 
 It got me a ticket to see Christopher Nolan's *The Odyssey* in IMAX 70mm.
 
-![The notification that worked](images/ntfy-notification.png)
+<img src="images/ntfy-notification.png" alt="The notification that worked" width="300">
 
 ## Why I built it
 
